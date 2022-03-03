@@ -18,6 +18,7 @@ func main() {
 
 		if time.Since(lastReport) > time.Second {
 			lastReport = time.Now()
+
 			fmt.Println(scanner.Text())
 			fmt.Printf("%d lines since %s, %.2f per second\n", cnt, start.Format(time.Stamp), float64(cnt)/time.Since(start).Seconds())
 		}
