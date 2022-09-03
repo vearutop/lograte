@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"time"
@@ -35,6 +36,7 @@ func main() {
 
 	if ver {
 		fmt.Println(version.Info().Version)
+
 		return
 	}
 
@@ -58,6 +60,7 @@ func main() {
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		cnt++
+
 		byteCnt += len(line)
 
 		if time.Since(lastReport) > interval {
@@ -94,6 +97,7 @@ func main() {
 			}
 
 			fmt.Printf("------ Top %d -------------------------\n", top)
+
 			if len(entries) > top {
 				entries = entries[0:top]
 			}
@@ -106,13 +110,20 @@ func main() {
 				fmt.Printf("%d lines, %.1f lps (%.1f%%), %.1f MB/s (%.1f%%), %d B/avg: %s\n",
 					e.cnt, lps, cntPercent, MBps, bytesPercent, e.bytes/e.cnt, samples[e.hash])
 			}
+
 			fmt.Printf("---------------------------------------\n\n")
 		}
 
 		if top > 0 {
 			filtered := filterAlphanumeric(line, length)
+
 			d.Reset()
-			_, _ = d.Write(filtered)
+
+			_, err := d.Write(filtered)
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+
 			h := d.Sum64()
 
 			if counts[h] == 0 {
@@ -124,6 +135,7 @@ func main() {
 			}
 
 			counts[h]++
+
 			byteCounts[h] += len(line)
 		}
 	}

@@ -22,6 +22,7 @@ func BenchmarkFilterAlphanumeric(b *testing.B) {
 func TestAlphanum(t *testing.T) {
 	filtered := string(filterAlphanumeric([]byte(logLine), 150))
 	expected := `X X X/X/X X:X:X.X baz handler failed to get cox: failed to get cox type: unknown cox type string: {quux} [R method:GET path:/X ra:X:X:X form:'map[bar:`
+
 	if expected != filtered {
 		t.Fatalf("unexpected filtered: %s", filtered)
 	}
@@ -36,7 +37,9 @@ func BenchmarkRegex(b *testing.B) {
 	// re := regexp.MustCompile(`([\w_-]\d)+|(\d[\w_-]+)+|([\d])+`)
 
 	s := []byte(logLine[0:150])
+
 	b.ReportAllocs()
+
 	for i := 0; i < b.N; i++ {
 		_ = re.ReplaceAll(s, []byte("X"))
 	}

@@ -20,6 +20,11 @@ linters-settings:
 linters:
   enable-all: true
   disable:
+    - cyclop
+    - funlen
+    - gocognit
+    - nestif
+    - revive
     - lll
     - maligned
     - gochecknoglobals

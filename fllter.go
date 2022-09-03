@@ -7,7 +7,8 @@ func filterAlphanumeric(data []byte, l int) []byte {
 	wordStart := -1
 
 	res := data[:0]
-	i := 0
+
+	var i int
 
 	for i = 0; i < len(data); i++ {
 		c := data[i]
