@@ -11,6 +11,11 @@ go install github.com/vearutop/lograte@latest
 
 or download prebuilt binary from [releases](https://github.com/vearutop/lograte/releases).
 
+```
+wget https://github.com/vearutop/lograte/releases/latest/download/linux_amd64.tar.gz && tar xf linux_amd64.tar.gz && rm linux_amd64.tar.gz
+./lograte -version
+```
+
 ## Usage
 
 Pipe the verbose output (for example tail of logs) to `lograte`
