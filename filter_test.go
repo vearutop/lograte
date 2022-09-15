@@ -28,6 +28,16 @@ func TestAlphanum(t *testing.T) {
 	}
 }
 
+func TestShortLine(t *testing.T) {
+	line := "foo-bar-12 i3 2022/09/15 11:24:10.689412 baz 0-275 foo bar"
+	expected := "X X X/X/X X:X:X.X baz X foo bar"
+	filtered := string(filterAlphanumeric([]byte(line), 120))
+
+	if expected != filtered {
+		t.Fatalf("unexpected filtered: %s", filtered)
+	}
+}
+
 // BenchmarkRegex checks regex-based filtering implementation, for reference.
 // BenchmarkRegex-12                 	   76851	     15707 ns/op	     200 B/op	       5 allocs/op.
 func BenchmarkRegex(b *testing.B) {
