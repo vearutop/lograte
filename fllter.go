@@ -12,6 +12,7 @@ func filterAlphanumeric(data []byte, l int) []byte {
 
 	for i = 0; i < len(data); i++ {
 		c := data[i]
+
 		isAlpha := false
 
 		switch {
@@ -50,6 +51,14 @@ func filterAlphanumeric(data []byte, l int) []byte {
 
 		if l > 0 && len(res) >= l {
 			return res
+		}
+	}
+
+	if wordStart >= 0 {
+		if hasDigit {
+			res = append(res, 'X')
+		} else {
+			res = append(res, data[wordStart:i]...)
 		}
 	}
 
