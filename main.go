@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime/pprof"
 	"sort"
 	"time"
 
@@ -15,13 +16,14 @@ import (
 
 func main() {
 	var (
-		buckets  int
-		top      int
-		length   int
-		interval time.Duration
-		ver      bool
-		bySize   bool
-		lineBuf  int
+		buckets    int
+		top        int
+		length     int
+		interval   time.Duration
+		ver        bool
+		bySize     bool
+		lineBuf    int
+		cpuProfile string
 	)
 
 	flag.IntVar(&buckets, "buckets", 500, "max number of buckets to track filtered messages")
@@ -31,8 +33,25 @@ func main() {
 	flag.BoolVar(&bySize, "by-size", false, "order messages by size instead of count")
 	flag.BoolVar(&ver, "version", false, "print version and exit")
 	flag.IntVar(&lineBuf, "line-buf", 1e7, "line token buffer size")
+	flag.StringVar(&cpuProfile, "dbg-cpu-prof", "", "write first 10 seconds of CPU profile to file")
 
 	flag.Parse()
+
+	if cpuProfile != "" {
+		f, err := os.Create(cpuProfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err = pprof.StartCPUProfile(f); err != nil {
+			log.Fatal(err)
+		}
+
+		go func() {
+			time.Sleep(10 * time.Second)
+			pprof.StopCPUProfile()
+		}()
+	}
 
 	if ver {
 		fmt.Println(version.Info().Version)
