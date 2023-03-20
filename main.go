@@ -38,7 +38,7 @@ func main() {
 	flag.Parse()
 
 	if cpuProfile != "" {
-		f, err := os.Create(cpuProfile)
+		f, err := os.Create(cpuProfile) //nolint:gosec
 		if err != nil {
 			log.Fatal(err)
 		}
