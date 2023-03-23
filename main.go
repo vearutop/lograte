@@ -134,7 +134,7 @@ func main() {
 		}
 
 		if top > 0 {
-			filtered := filterAlphanumeric(line, length)
+			filtered := filterDynamic(line, length)
 
 			d.Reset()
 
