@@ -19,7 +19,7 @@ func filterDynamic(data []byte, l int) []byte {
 		c := data[i]
 
 		isAlpha := false
-		var charType byte
+		charType := byte(0)
 
 		switch {
 		case c >= 'a' && c <= 'z':
