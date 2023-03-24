@@ -12,6 +12,7 @@ import (
 
 	"github.com/bool64/dev/version"
 	"github.com/cespare/xxhash/v2"
+	"github.com/vearutop/lograte/filter"
 )
 
 func main() {
@@ -134,7 +135,7 @@ func main() {
 		}
 
 		if top > 0 {
-			filtered := filterDynamic(line, length)
+			filtered := filter.Dynamic(line, length)
 
 			d.Reset()
 

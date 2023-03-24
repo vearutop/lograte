@@ -1,8 +1,12 @@
-package main
+// Package filter provides a function to filter dynamic values/identifiers from a string.
+package filter
 
-// filterDynamic replaces a-zA-Z_-% sequences that have at least one digit or 5+ consecutive consolants/vowels with X.
-// Does not allocate, uses original slice.
-func filterDynamic(data []byte, l int) []byte {
+// Dynamic replaces a-zA-Z_-% sequences that have at least one digit or 5+ consecutive consonants/vowels with X.
+//
+// This is useful for filtering out dynamic values from log lines.
+// Filtering is best effort, it does not guarantee that all dynamic values are filtered.
+// Does not allocate, mutates original slice.
+func Dynamic(data []byte, l int) []byte {
 	hasDigit := false
 	wordStart := -1
 	maxConsecutive := 0
