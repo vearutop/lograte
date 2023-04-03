@@ -36,6 +36,7 @@ BUILD_FLAGS=-trimpath -pgo=auto
 -include $(DEVGO_PATH)/makefiles/test-unit.mk
 -include $(DEVGO_PATH)/makefiles/bench.mk
 -include $(DEVGO_PATH)/makefiles/reset-ci.mk
+-include $(DEVGO_PATH)/makefiles/build.mk
 -include $(DEVGO_PATH)/makefiles/release-assets.mk
 
 # Add your custom targets here.

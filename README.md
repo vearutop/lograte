@@ -64,6 +64,16 @@ foo-bar-18 i2 2022/09/03 08:22:17.206522 <recent log entry>
 ---------------------------------------
 ```
 
+If you want to analyze existing log files, you can use `lograte` with `cat` or something similar to read them.
+For such case you can use `-parse-time-format` and `-parse-time-regex` to parse time from log line instead of current clock.
+
+
+For example such command would read all `*.zst` files in current directory, filter them with `zstdgrep` and then analyze
+using `time.RFC3339Nano` format for the first value between space and tab as a timestamp.
+```
+zstdgrep "fancy error" *.zst | ~/lograte -top 100 -buckets 1000 -parse-time-regex " ([\d-T:.Z]+)\t" -parse-time-format "2006-01-02T15:04:05.999999999Z07:00"
+```
+
 ### Flags
 
 ```
@@ -72,17 +82,23 @@ lograte -help
 ```
 Usage of lograte:
   -buckets int
-    	max number of buckets to track filtered messages (default 500)
+        max number of buckets to track filtered messages (default 500)
   -by-size
-    	order messages by size instead of count
+        order messages by size instead of count
+  -dbg-cpu-prof string
+        write first 10 seconds of CPU profile to file
   -len int
-    	limit message length (default 120)
+        limit message length (default 120)
   -line-buf int
-    	line token buffer size (default 10000000)
+        line token buffer size (default 10000000)
+  -parse-time-format string
+        format to parse time from log line
+  -parse-time-regex string
+        regex to parse time value from log line
   -t duration
-    	reporting interval (default 1s)
+        reporting interval (default 1s)
   -top int
-    	show top filtered messages ordered by rate
+        show top filtered messages ordered by rate
   -version
-    	print version and exit
+        print version and exit
 ```
