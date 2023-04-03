@@ -76,7 +76,7 @@ func main() {
 
 	start := time.Now()
 	lastReport := start
-	lastTs := start
+	lastTS := start
 
 	counts := map[uint64]int{}
 	byteCounts := map[uint64]int{}
@@ -93,10 +93,10 @@ func main() {
 		lastReport = time.Now()
 
 		if timeRegex == nil {
-			lastTs = lastReport
+			lastTS = lastReport
 		}
 
-		ela := lastTs.Sub(start).Seconds()
+		ela := lastTS.Sub(start).Seconds()
 		lps := float64(cnt) / ela
 		MBps := float64(byteCnt) / (ela * 1024 * 1024)
 
@@ -145,11 +145,6 @@ func main() {
 		fmt.Printf("---------------------------------------\n\n")
 	}
 
-	var (
-		ts  time.Time
-		err error
-	)
-
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		cnt++
@@ -162,7 +157,7 @@ func main() {
 				panic("no matches for timestamp regex")
 			}
 
-			ts, err = time.Parse(parseTimeFormat, string(matches[1]))
+			ts, err := time.Parse(parseTimeFormat, string(matches[1]))
 			if err != nil {
 				panic(err)
 			}
@@ -171,9 +166,7 @@ func main() {
 				start = ts
 			}
 
-			lastTs = ts
-		} else {
-			ts = time.Now()
+			lastTS = ts
 		}
 
 		if time.Since(lastReport) > interval {
