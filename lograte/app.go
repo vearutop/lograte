@@ -1,3 +1,4 @@
+// Package lograte is a CLI app.
 package lograte
 
 import (
