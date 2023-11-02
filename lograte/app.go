@@ -102,6 +102,12 @@ func Main() {
 		lps := float64(cnt) / ela
 		MBps := float64(byteCnt) / (ela * 1024 * 1024)
 
+		if cnt == 0 {
+			fmt.Printf("0 lines since %s\n", start.Format(time.Stamp))
+
+			return
+		}
+
 		fmt.Println(scanner.Text())
 		fmt.Printf("%d lines since %s, %.1f per second, %.1f MB/s, %d B/avg\n",
 			cnt, start.Format(time.Stamp), lps, MBps, byteCnt/cnt)
