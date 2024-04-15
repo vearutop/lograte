@@ -74,6 +74,12 @@ using `time.RFC3339Nano` format for the first value between space and tab as a t
 zstdgrep "fancy error" *.zst | ~/lograte -top 100 -buckets 1000 -parse-time-regex " ([\d-T:.Z]+)\t" -parse-time-format "2006-01-02T15:04:05.999999999Z07:00"
 ```
 
+or if you want to analyze lines/bytes distribution without time, use `-no-time`
+```
+zstdgrep "fancy error" *.zst | ~/lograte -top 100 -buckets 1000 -no-time
+```
+
+
 ### Flags
 
 ```
@@ -91,10 +97,16 @@ Usage of lograte:
         limit message length (default 120)
   -line-buf int
         line token buffer size (default 10000000)
+  -max-lines int
+        stop after a number of processed lines
+  -no-time
+        do not use time metrics, for non tailing mode
   -parse-time-format string
         format to parse time from log line
   -parse-time-regex string
         regex to parse time value from log line
+  -skip-lines int
+        number of lines to skip at the beginning
   -t duration
         reporting interval (default 1s)
   -top int
