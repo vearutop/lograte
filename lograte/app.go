@@ -17,6 +17,9 @@ import (
 	"github.com/vearutop/lograte/filter"
 )
 
+// ParseTime is an option to extract line timestamp.
+var ParseTime func(line []byte) (time.Time, error)
+
 // Main is the lograte application.
 func Main() {
 	var (
@@ -26,10 +29,13 @@ func Main() {
 		interval        time.Duration
 		ver             bool
 		bySize          bool
+		noTime          bool
 		lineBuf         int
 		cpuProfile      string
 		parseTimeRegex  string
 		parseTimeFormat string
+		skipLines       int
+		maxLines        int
 	)
 
 	flag.IntVar(&buckets, "buckets", 500, "max number of buckets to track filtered messages")
@@ -39,6 +45,9 @@ func Main() {
 	flag.BoolVar(&bySize, "by-size", false, "order messages by size instead of count")
 	flag.BoolVar(&ver, "version", false, "print version and exit")
 	flag.IntVar(&lineBuf, "line-buf", 1e7, "line token buffer size")
+	flag.BoolVar(&noTime, "no-time", false, "do not use time metrics, for non tailing mode")
+	flag.IntVar(&skipLines, "skip-lines", 0, "number of lines to skip at the beginning")
+	flag.IntVar(&maxLines, "max-lines", 0, "stop after a number of processed lines")
 	flag.StringVar(&parseTimeRegex, "parse-time-regex", "", "regex to parse time value from log line")
 	flag.StringVar(&parseTimeFormat, "parse-time-format", "", "format to parse time from log line")
 	flag.StringVar(&cpuProfile, "dbg-cpu-prof", "", "write first 10 seconds of CPU profile to file")
@@ -94,23 +103,34 @@ func Main() {
 	report := func() {
 		lastReport = time.Now()
 
-		if timeRegex == nil {
+		if timeRegex == nil && ParseTime == nil {
 			lastTS = lastReport
 		}
 
 		ela := lastTS.Sub(start).Seconds()
 		lps := float64(cnt) / ela
-		MBps := float64(byteCnt) / (ela * 1024 * 1024)
+		MB := float64(byteCnt) / (1024 * 1024)
+		MBps := MB / ela
 
 		if cnt == 0 {
-			fmt.Printf("0 lines since %s\n", start.Format(time.Stamp))
+			if noTime {
+				fmt.Printf("0 lines, %.1f MB\n", MB)
+			} else {
+				fmt.Printf("0 lines,  %.1f MB since %s\n", MB, start.Format(time.Stamp))
+			}
 
 			return
 		}
 
 		fmt.Println(scanner.Text())
-		fmt.Printf("%d lines since %s, %.1f per second, %.1f MB/s, %d B/avg\n",
-			cnt, start.Format(time.Stamp), lps, MBps, byteCnt/cnt)
+
+		if noTime {
+			fmt.Printf("%d lines, %.1f MB, %d B/avg\n",
+				cnt, MB, byteCnt/cnt)
+		} else {
+			fmt.Printf("%d lines since %s, %.1f per second, %.1f MB/s, %d B/avg\n",
+				cnt, start.Format(time.Stamp), lps, MBps, byteCnt/cnt)
+		}
 
 		if top <= 0 {
 			return
@@ -142,12 +162,19 @@ func Main() {
 		}
 
 		for _, e := range entries {
-			cntPercent := 100 * float64(e.cnt) / float64(cnt)
+			cntPercent := 100 * float64(e.cnt) / float64(cnt-skipLines)
 			bytesPercent := 100 * float64(e.bytes) / float64(byteCnt)
 			lps = float64(e.cnt) / ela
-			MBps = float64(byteCounts[e.hash]) / (ela * 1024 * 1024)
-			fmt.Printf("%d lines, %.1f lps (%.1f%%), %.1f MB/s (%.1f%%), %d B/avg: %s\n",
-				e.cnt, lps, cntPercent, MBps, bytesPercent, e.bytes/e.cnt, samples[e.hash])
+			MB = float64(byteCounts[e.hash]) / (1024 * 1024)
+			MBps = MB / ela
+
+			if noTime {
+				fmt.Printf("%d lines (%.1f%%), %.1f MB (%.1f%%), %d B/avg: %s\n",
+					e.cnt, cntPercent, MB, bytesPercent, e.bytes/e.cnt, samples[e.hash])
+			} else {
+				fmt.Printf("%d lines, %.1f lps (%.1f%%), %.1f MB/s (%.1f%%), %d B/avg: %s\n",
+					e.cnt, lps, cntPercent, MBps, bytesPercent, e.bytes/e.cnt, samples[e.hash])
+			}
 		}
 
 		fmt.Printf("---------------------------------------\n\n")
@@ -156,6 +183,14 @@ func Main() {
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		cnt++
+
+		if skipLines > 0 && cnt < skipLines {
+			continue
+		}
+
+		if maxLines > 0 && cnt >= maxLines {
+			break
+		}
 
 		byteCnt += len(line)
 
@@ -175,6 +210,19 @@ func Main() {
 			}
 
 			lastTS = ts
+		} else if ParseTime != nil {
+			ts, err := ParseTime(line)
+			if err != nil {
+				panic(err)
+			}
+
+			if !ts.IsZero() {
+				if start.IsZero() {
+					start = ts
+				}
+
+				lastTS = ts
+			}
 		}
 
 		if time.Since(lastReport) > interval {
