@@ -102,6 +102,9 @@ func Main() {
 	var timeRegex *regexp.Regexp
 	if parseTimeRegex != "" {
 		timeRegex = regexp.MustCompile(parseTimeRegex)
+	}
+
+	if parseTimeFormat != "" || ParseTime != nil {
 		start = time.Time{}
 	}
 
