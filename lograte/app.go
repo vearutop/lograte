@@ -17,8 +17,13 @@ import (
 	"github.com/vearutop/lograte/filter"
 )
 
-// ParseTime is an option to extract line timestamp.
-var ParseTime func(line []byte) (time.Time, error)
+var (
+	// ParseTime is an option to extract line timestamp.
+	ParseTime func(line []byte) (time.Time, error)
+
+	// FilterLine is an option to control filtering, default filter.Dynamic.
+	FilterLine func(i int, line []byte) []byte
+)
 
 // Main is the lograte application.
 func Main() {
@@ -230,7 +235,13 @@ func Main() {
 		}
 
 		if top > 0 {
-			filtered := filter.Dynamic(line, length)
+			var filtered []byte
+
+			if FilterLine != nil {
+				filtered = FilterLine(cnt, line)
+			} else {
+				filtered = filter.Dynamic(line, length)
+			}
 
 			d.Reset()
 

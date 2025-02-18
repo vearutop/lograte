@@ -1,6 +1,8 @@
 package main
 
-import "github.com/vearutop/lograte/lograte"
+import (
+	"github.com/vearutop/lograte/lograte"
+)
 
 func main() {
 	lograte.Main()
